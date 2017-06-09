@@ -19,7 +19,9 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -36,20 +38,23 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mCurrentLocation;
-    LocationRequest mLocationRequest;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-            }else {
-                retrieveLocation();
+        mLocationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for(Location location : locationResult.getLocations()){
+                    Log.d(TAG, String.valueOf(location.getLatitude()));
+                    Log.d(TAG, String.valueOf(location.getLongitude()));
+                }
             }
-        }
+        };
     }
 
     @Override
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createLocationRequest() {
+        Log.d(TAG, "inside createLocationRequest");
         if(mLocationRequest == null){
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(10000);
@@ -144,7 +150,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        startLocationUpdates();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+            }else {
+                retrieveLocation();
+            }
+        }
     }
 
     @Override
@@ -160,5 +172,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void startLocationUpdates() {
         Log.d(TAG, "start location updates");
+        try{
+            if(mLocationRequest == null){
+                Log.d(TAG, "1");
+            }else if (mLocationCallback == null){
+                Log.d(TAG, "2");
+            }
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+        }catch (SecurityException e){
+            e.printStackTrace();
+        }
     }
 }
