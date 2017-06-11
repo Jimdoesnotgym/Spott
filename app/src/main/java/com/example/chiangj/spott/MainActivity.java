@@ -41,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
 
+    //make a button, when pressed, start location updates instead of this boolean
+    private boolean isRequestingLocationUpdates = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+            }else {
+                retrieveLocation();
+            }
+        }
     }
 
     @Override
@@ -117,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 //initialize location requests here
                 Log.d(TAG, "LocationSettingsResponse onSuccess, starting location updates");
+                isRequestingLocationUpdates = true;
                 startLocationUpdates();
             }
         });
@@ -148,18 +160,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-            }else {
-                retrieveLocation();
-            }
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case REQUEST_CHECK_SETTINGS:
@@ -171,16 +171,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startLocationUpdates() {
-        Log.d(TAG, "start location updates");
-        try{
-            if(mLocationRequest == null){
-                Log.d(TAG, "1");
-            }else if (mLocationCallback == null){
-                Log.d(TAG, "2");
+        if(isRequestingLocationUpdates){
+            Log.d(TAG, "start location updates");
+            try{
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+            }catch (SecurityException e){
+                e.printStackTrace();
             }
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-        }catch (SecurityException e){
-            e.printStackTrace();
         }
     }
+
+    private void stopLocationUpdates() {
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        retrieveLocation();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+
 }
