@@ -27,11 +27,17 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "MainActivity";
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
+    private LatLng mCurrentLatLng;
 
     //make a button, when pressed, start location updates instead of this boolean
     private boolean isRequestingLocationUpdates = false;
@@ -49,16 +56,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for(Location location : locationResult.getLocations()){
-                    Log.d(TAG, String.valueOf(location.getLatitude()));
-                    Log.d(TAG, String.valueOf(location.getLongitude()));
-                }
-            }
-        };
-
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
@@ -66,6 +63,29 @@ public class MainActivity extends AppCompatActivity {
                 retrieveLocation();
             }
         }
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        mLocationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for(Location location : locationResult.getLocations()){
+                    Log.d(TAG, String.valueOf(location.getLatitude()));
+                    Log.d(TAG, String.valueOf(location.getLongitude()));
+                    if(location != mCurrentLocation){
+                        mCurrentLocation = location;
+                        updateMap();
+                    }
+                }
+            }
+        };
+    }
+
+    private void updateMap() {
+    }
+
+    private void showOnMap() {
     }
 
     @Override
@@ -99,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         Log.d(TAG, String.valueOf(location.getLatitude()));
                         Log.d(TAG, String.valueOf(location.getLongitude()));
-
+                        showOnMap();
                         createLocationRequest();
                     }
                 }
@@ -198,4 +218,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        if(mCurrentLocation != null){
+            mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+            googleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(mCurrentLatLng));
+        }else{
+            retrieveLocation();
+        }
+    }
 }
