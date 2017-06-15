@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mPreviousMarker;
     private Marker mCurrentMarker;
 
-    private Button mButtonCenterMap;
+    private at.markushi.ui.CircleButton mButtonCenterMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        mButtonCenterMap = (Button) findViewById(R.id.btn_center_map);
+        mButtonCenterMap = (at.markushi.ui.CircleButton) findViewById(R.id.btn_center_map);
         mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -126,9 +127,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void showOnMap() {
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -160,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 Toast.LENGTH_SHORT).show();
                         Log.d(TAG, String.valueOf(location.getLatitude()));
                         Log.d(TAG, String.valueOf(location.getLongitude()));
-                        showOnMap();
                         createLocationRequest();
                     }
                 }
