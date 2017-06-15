@@ -29,6 +29,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //make a button, when pressed, start location updates instead of this boolean
     private boolean isRequestingLocationUpdates = false;
+    private GoogleMap mGoogleMap;
+    private boolean mMapAnimated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,25 +67,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
         mLocationCallback = new LocationCallback(){
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for(Location location : locationResult.getLocations()){
                     Log.d(TAG, String.valueOf(location.getLatitude()));
                     Log.d(TAG, String.valueOf(location.getLongitude()));
-                    if(location != mCurrentLocation){
+                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
                         mCurrentLocation = location;
+                        Log.d(TAG, "update map");
                         updateMap();
                     }
                 }
             }
         };
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        Log.d(TAG, "getMapAsync");
+        mapFragment.getMapAsync(this);
+
+
     }
 
     private void updateMap() {
+        mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 16.0f));
     }
 
     private void showOnMap() {
@@ -220,12 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if(mCurrentLocation != null){
-            mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            googleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(mCurrentLatLng));
-        }else{
-            retrieveLocation();
-        }
+        Log.d(TAG, "onMapReady, setting map object");
+        mGoogleMap = googleMap;
     }
 }
