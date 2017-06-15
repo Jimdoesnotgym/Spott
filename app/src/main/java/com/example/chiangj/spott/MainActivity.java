@@ -12,7 +12,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
@@ -33,6 +37,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -53,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isRequestingLocationUpdates = false;
     private GoogleMap mGoogleMap;
     private boolean mMapAnimated = false;
+    private Marker mPreviousMarker;
+    private Marker mCurrentMarker;
+
+    private Button mButtonCenterMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +75,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 retrieveLocation();
             }
         }
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+        mButtonCenterMap = (Button) findViewById(R.id.btn_center_map);
+        mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(mCurrentMarker != null){
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+                    return true;
+                }
+                return false;
+            };
+        });
 
         mLocationCallback = new LocationCallback(){
             @Override
@@ -91,8 +115,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateMap() {
         mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 16.0f));
+        if(mCurrentMarker == null){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }else {
+            mPreviousMarker = mCurrentMarker;
+            mPreviousMarker.remove();
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }
+
     }
 
     private void showOnMap() {
@@ -143,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "inside createLocationRequest");
         if(mLocationRequest == null){
             mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(10000);
-            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setInterval(5000);
+            mLocationRequest.setFastestInterval(2500);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         }
 
