@@ -20,11 +20,17 @@ public class SongListActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_switch_to_map:
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                /*Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);*/
+                onBackPressed();
                 return true;
 
             default:

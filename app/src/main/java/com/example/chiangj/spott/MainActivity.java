@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationCallback mLocationCallback;
     private LatLng mCurrentLatLng;
 
-    //make a button, when pressed, start location updates instead of this boolean
     private boolean isRequestingLocationUpdates = false;
     private GoogleMap mGoogleMap;
     private boolean mMapAnimated = false;
@@ -82,11 +81,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
-        if(savedInstanceState != null){
+        /*if(savedInstanceState != null){
             Log.d(TAG, "savedInstanceState is not null");
             mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
             mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
-        }
+        }*/
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -264,9 +263,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putParcelable("cameraposition", mGoogleMap.getCameraPosition());
         outState.putBoolean("isFirstLaunch", false);
-        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d(TAG, "onrestoreinstancestate");
+        mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
+        mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
     }
 
     private void startLocationUpdates() {
