@@ -39,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -63,8 +64,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mMapAnimated = false;
     private Marker mPreviousMarker;
     private Marker mCurrentMarker;
+    private CameraPosition mCurrentCameraPosition;
 
     private at.markushi.ui.CircleButton mButtonCenterMap;
+    private boolean mIsFirstLaunch = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +80,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }else {
                 retrieveLocation();
             }
+        }
+
+        if(savedInstanceState != null){
+            Log.d(TAG, "savedInstanceState is not null");
+            mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
+            mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
         }
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -137,8 +146,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateMap() {
         mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if(mCurrentMarker == null){
+        if(mIsFirstLaunch){
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+        }
+        if(mCurrentMarker == null){
+            //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
             mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
         }else {
             mPreviousMarker = mCurrentMarker;
@@ -249,6 +261,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("cameraposition", mGoogleMap.getCameraPosition());
+        outState.putBoolean("isFirstLaunch", false);
+        super.onSaveInstanceState(outState);
+    }
+
     private void startLocationUpdates() {
         if(isRequestingLocationUpdates){
             Log.d(TAG, "start location updates");
@@ -266,12 +285,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
+
         retrieveLocation();
     }
 
     @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onPause() {
+        Log.d(TAG, "onPause");
         super.onPause();
         stopLocationUpdates();
     }
@@ -281,5 +309,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady, setting map object");
         mGoogleMap = googleMap;
+
+        if(mCurrentCameraPosition != null && mGoogleMap != null){
+            Log.d(TAG, "mCurrentCameraPosition is not null");
+            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
+        }
     }
 }
