@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         if(mIsFirstLaunch){
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mIsFirstLaunch = false;
         }
         if(mCurrentMarker == null){
             //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
