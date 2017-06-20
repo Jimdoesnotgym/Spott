@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/my_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/AppTheme"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:name="com.google.android.gms.maps.MapFragment"
@@ -20,14 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <at.markushi.ui.CircleButton
-        android:id="@+id/btn_center_map"
-        android:layout_width="64dip"
-        android:layout_height="64dip"
-        app:cb_pressedRingWidth="10dip"
-        android:src="@mipmap/ic_btn_center_map"
-        android:layout_gravity="bottom|left"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"/>
+    <!-- include bottom sheet -->
+    <include layout="@layout/bottom_sheet" />
 
-</FrameLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_center_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@+id/bottom_sheet"
+        android:src="@drawable/ic_btn_center_map"
+        android:layout_margin="20dp"
+        android:backgroundTint="@color/colorAccent"
+        app:layout_anchorGravity="top|end"
+        android:background="@color/colorAccent"/>
+
+
+</android.support.design.widget.CoordinatorLayout>

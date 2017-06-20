@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -65,8 +67,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mCurrentMarker;
     private CameraPosition mCurrentCameraPosition;
 
-    private at.markushi.ui.CircleButton mButtonCenterMap;
+    private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
+
+    private View mBottomSheetSongList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,10 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
         }*/
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-
-        mButtonCenterMap = (at.markushi.ui.CircleButton) findViewById(R.id.btn_center_map);
+        /*mButtonCenterMap = (at.markushi.ui.CircleButton) findViewById(R.id.btn_center_map);
         mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -100,6 +101,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 return false;
             };
+        });*/
+
+        mButtonCenterMap = (FloatingActionButton)findViewById(R.id.btn_center_map);
+        mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(mCurrentMarker != null){
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        mBottomSheetSongList = findViewById(R.id.bottom_sheet);
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheetSongList);
+        // set callback for changes
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                mButtonCenterMap.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+            }
         });
 
         mLocationCallback = new LocationCallback(){
@@ -121,26 +148,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "getMapAsync");
         mapFragment.getMapAsync(this);
 
-
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.btn_switch_to_song_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_switch_to_list:
-               Intent intent = new Intent(this, SongListActivity.class);
-                startActivity(intent);
-                return true;
-
-            default:
-                return false;
-        }
     }
 
     private void updateMap() {
