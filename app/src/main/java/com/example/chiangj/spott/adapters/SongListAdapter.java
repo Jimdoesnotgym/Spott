@@ -11,13 +11,22 @@ import android.widget.ArrayAdapter;
 import java.util.List;
 
 public class SongListAdapter<Song> extends ArrayAdapter{
+    private List<Song> mListOfSongs;
+    private final int mListItemLayoutResource;
+
     public SongListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List objects) {
         super(context, resource, objects);
+
+        mListOfSongs = objects;
+        mListItemLayoutResource = resource;
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        return super.getView(position, convertView, parent);
+        if(convertView == null){
+            convertView = 
+        }
+        return convertView;
     }
 }

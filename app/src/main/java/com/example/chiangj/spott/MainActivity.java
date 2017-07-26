@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setUpBottomSheetSongList();
         setUpLocationCallback();
         setUpMap();
-
     }
 
     @Override
