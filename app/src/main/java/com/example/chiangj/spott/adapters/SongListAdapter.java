@@ -1,58 +1,69 @@
 package com.example.chiangj.spott.adapters;
 
-import android.content.Context;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.Layout;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.chiangj.spott.R;
-import com.example.chiangj.spott.viewholders.SongViewHolder;
 import com.example.chiangj.spott.models.Song;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class SongListAdapter extends ArrayAdapter<Song>{
-    private List<Song> mListOfSongs;
-    private final int mListItemLayoutResource;
-    private Context mContext;
 
-    public SongListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull Song[] objects) {
-        super(context, resource, objects);
+public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongViewHolder>{
+    private static final String TAG = SongListAdapter.class.getSimpleName();
 
-        mListOfSongs = Arrays.asList((Song[])objects);
-        mListItemLayoutResource = resource;
-        mContext = context;
-    }
+    private List<Song> mSongList;
 
-    @NonNull
-    @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        Song currentSong = mListOfSongs.get(position);
+    public static class SongViewHolder extends RecyclerView.ViewHolder{
+        private final TextView songName;
+        private final TextView artistName;
 
-        if(convertView == null){
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(mListItemLayoutResource, null, false);
+        public SongViewHolder(View itemView) {
+            super(itemView);
 
-            SongViewHolder viewHolder = new SongViewHolder();
-            viewHolder.songName = (TextView) convertView.findViewById(R.id.song_name);
-            viewHolder.artistName = (TextView) convertView.findViewById(R.id.artist_name);
-
-            convertView.setTag(viewHolder);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
+                }
+            });
+            songName = (TextView) itemView.findViewById(R.id.song_name);
+            artistName = (TextView) itemView.findViewById(R.id.artist_name);
         }
-        TextView songName = ((SongViewHolder)convertView.getTag()).songName;
-        TextView artistName = ((SongViewHolder)convertView.getTag()).artistName;
 
-        //TODO get current song
-        songName.setText(currentSong.getSongName());
-        artistName.setText(currentSong.getArtistName());
+        public TextView getSongName(){
+            return songName;
+        }
 
-        return convertView;
+        public TextView getArtistName(){
+            return artistName;
+        }
     }
+
+    public SongListAdapter(List<Song> dataSet){
+        mSongList = dataSet;
+    }
+
+    @Override
+    public SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.song_list_item, parent, false);
+
+        return new SongViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(SongViewHolder holder, int position) {
+        holder.getSongName().setText(mSongList.get(position).getSongName());
+        holder.getArtistName().setText(mSongList.get(position).getArtistName());
+    }
+
+    @Override
+    public int getItemCount() {
+        return mSongList.size();
+    }
+
 }

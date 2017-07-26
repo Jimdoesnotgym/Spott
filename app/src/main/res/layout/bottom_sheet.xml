@@ -19,12 +19,12 @@
         style="@style/SongListTextView"
         android:textColor="@android:color/white" />
 
-    <ListView
-        android:id="@+id/listView_songlist"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white">
 
-    </ListView>
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

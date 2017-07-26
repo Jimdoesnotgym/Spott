@@ -14,6 +14,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +54,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "MainActivity";
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
@@ -76,14 +80,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private View mBottomSheetSongList;
     private SongListAdapter mSongListAdapter;
-    private ListView mSongListView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSongListView = (ListView) findViewById(R.id.listView_songlist);
+        mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -236,14 +244,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if(isLocationChanged){
                             isLocationChanged = false;
                             //query songs with rxJava and retrofit, parse, then update UI through adapter
-                            Song[] songList = {
+                            Song[] songs = {
                                     new Song("A", "1"),
-                                    new Song("B", "2"),
+                                    new Song("B","2"),
                                     new Song("C", "3")
                             };
 
-                            mSongListAdapter = new SongListAdapter(MainActivity.this, R.layout.song_list_item, songList);
-                            mSongListView.setAdapter(mSongListAdapter);
+                            mSongListAdapter = new SongListAdapter(Arrays.asList(songs));
+                            mRecyclerView.setAdapter(mSongListAdapter);
                         }
                 }
             }
