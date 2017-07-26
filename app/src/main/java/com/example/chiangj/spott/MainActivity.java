@@ -24,6 +24,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.chiangj.spott.adapters.SongListAdapter;
+import com.example.chiangj.spott.models.Song;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -66,11 +68,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mPreviousMarker;
     private Marker mCurrentMarker;
     private CameraPosition mCurrentCameraPosition;
+    private boolean isLocationChanged;
 
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
 
     private View mBottomSheetSongList;
+    private SongListAdapter<Song> mSongListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,24 +89,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
-        /*if(savedInstanceState != null){
-            Log.d(TAG, "savedInstanceState is not null");
-            mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
-            mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
-        }*/
-
-        /*mButtonCenterMap = (at.markushi.ui.CircleButton) findViewById(R.id.btn_center_map);
-        mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(mCurrentMarker != null){
-                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
-                    return true;
-                }
-                return false;
-            };
-        });*/
-
         mButtonCenterMap = (FloatingActionButton)findViewById(R.id.btn_center_map);
         mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -115,56 +101,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        mBottomSheetSongList = findViewById(R.id.bottom_sheet);
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheetSongList);
-        // set callback for changes
-        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                mButtonCenterMap.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
-            }
-        });
-
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for(Location location : locationResult.getLocations()){
-                    Log.d(TAG, String.valueOf(location.getLatitude()));
-                    Log.d(TAG, String.valueOf(location.getLongitude()));
-                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
-                        mCurrentLocation = location;
-                        Log.d(TAG, "update map");
-                        updateMap();
-                    }
-                }
-            }
-        };
-
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        Log.d(TAG, "getMapAsync");
-        mapFragment.getMapAsync(this);
+        setUpBottomSheetSongList();
+        setUpLocationCallback();
+        setUpMap();
 
     }
 
-    private void updateMap() {
-        mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if(mIsFirstLaunch){
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
-            mIsFirstLaunch = false;
-        }
-        if(mCurrentMarker == null){
-            //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
-            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        }else {
-            mPreviousMarker = mCurrentMarker;
-            mPreviousMarker.remove();
-            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        }
+    @Override
+    protected void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
 
+        retrieveLocation();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d(TAG, "onPause");
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
+        super.onDestroy();
     }
 
     @Override
@@ -182,6 +143,123 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case REQUEST_CHECK_SETTINGS:
+                if(resultCode == RESULT_OK){
+                    Log.d(TAG, "REQUEST_CHECK_SETTINGS result ok");
+                    startLocationUpdates();
+                }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("cameraposition", mGoogleMap.getCameraPosition());
+        outState.putBoolean("isFirstLaunch", false);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d(TAG, "onrestoreinstancestate");
+        mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
+        mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.d(TAG, "onMapReady, setting map object");
+        mGoogleMap = googleMap;
+
+        if(mCurrentCameraPosition != null && mGoogleMap != null){
+            Log.d(TAG, "mCurrentCameraPosition is not null");
+            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
+        }
+    }
+
+    private void setUpMap() {
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        Log.d(TAG, "getMapAsync");
+        mapFragment.getMapAsync(this);
+    }
+
+    private void setUpLocationCallback() {
+        mLocationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for(Location location : locationResult.getLocations()){
+                    Log.d(TAG, String.valueOf(location.getLatitude()));
+                    Log.d(TAG, String.valueOf(location.getLongitude()));
+                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
+
+                        /*************************************************************
+                         Should use the following when can actually test while moving
+                         if(mCurrentLocation != location){
+                         mCurrentLocation = location;
+                         Log.d(TAG, "update map");
+                         updateMap();
+                         }
+                         *************************************************************/
+
+                        if(mCurrentLocation != location) {
+                            isLocationChanged = true;
+                        }
+
+                        mCurrentLocation = location;
+                        if(BuildConfig.DEBUG) Log.d(TAG, "location changed, update map");
+                        updateMap();
+                    }
+                }
+            }
+        };
+    }
+
+    private void setUpBottomSheetSongList() {
+        mBottomSheetSongList = findViewById(R.id.bottom_sheet);
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheetSongList);
+        // set callback for changes
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if(BuildConfig.DEBUG) Log.d(TAG, String.valueOf(newState));
+
+                switch (newState){
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        if(isLocationChanged){
+                            isLocationChanged = false;
+                            //query songs with rxJava and retrofit, parse, then update UI through adapter
+
+                        }
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                mButtonCenterMap.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+            }
+        });
+    }
+
+    private void updateMap() {
+        mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        if(mIsFirstLaunch){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mIsFirstLaunch = false;
+        }
+        if(mCurrentMarker == null){
+            //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }else {
+            mPreviousMarker = mCurrentMarker;
+            mPreviousMarker.remove();
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }
+
     }
 
     public void retrieveLocation(){
@@ -257,32 +335,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case REQUEST_CHECK_SETTINGS:
-                if(resultCode == RESULT_OK){
-                    Log.d(TAG, "REQUEST_CHECK_SETTINGS result ok");
-                    startLocationUpdates();
-                }
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelable("cameraposition", mGoogleMap.getCameraPosition());
-        outState.putBoolean("isFirstLaunch", false);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        Log.d(TAG, "onrestoreinstancestate");
-        mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
-        mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
-    }
-
     private void startLocationUpdates() {
         if(isRequestingLocationUpdates){
             Log.d(TAG, "start location updates");
@@ -296,38 +348,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-    }
-
-    @Override
-    protected void onResume() {
-        Log.d(TAG, "onResume");
-        super.onResume();
-
-        retrieveLocation();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.d(TAG, "onPause");
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.d(TAG, "onMapReady, setting map object");
-        mGoogleMap = googleMap;
-
-        if(mCurrentCameraPosition != null && mGoogleMap != null){
-            Log.d(TAG, "mCurrentCameraPosition is not null");
-            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
-        }
     }
 }

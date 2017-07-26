@@ -20,9 +20,10 @@
         android:layout_height="wrap_content"
         app:layout_anchor="@+id/bottom_sheet"
         android:src="@drawable/ic_btn_center_map"
-        android:layout_margin="20dp"
+        android:layout_margin="16dp"
         android:backgroundTint="@color/colorAccent"
         app:layout_anchorGravity="top|end"
+        app:borderWidth="0dp"
         android:background="@color/colorAccent"/>
 
 

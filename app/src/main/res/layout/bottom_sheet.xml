@@ -15,7 +15,8 @@
         android:layout_height="60dp"
         android:background="@color/colorAccent"
         android:gravity="center"
-        android:text="Song List"
+        android:text="SONG LIST"
+        style="@style/SongListTextView"
         android:textColor="@android:color/white" />
 
     <android.support.v7.widget.RecyclerView
