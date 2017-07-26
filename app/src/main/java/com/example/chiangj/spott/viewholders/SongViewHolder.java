@@ -1,8 +1,8 @@
 package com.example.chiangj.spott.viewholders;
 
-/**
- * Created by chiangj on 26-7-17.
- */
+import android.widget.TextView;
 
 public class SongViewHolder {
+    public TextView songName;
+    public TextView artistName;
 }

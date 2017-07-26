@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.chiangj.spott.adapters.SongListAdapter;
@@ -74,12 +75,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mIsFirstLaunch = true;
 
     private View mBottomSheetSongList;
-    private SongListAdapter<Song> mSongListAdapter;
+    private SongListAdapter mSongListAdapter;
+    private ListView mSongListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSongListView = (ListView) findViewById(R.id.listView_songlist);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -232,7 +236,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if(isLocationChanged){
                             isLocationChanged = false;
                             //query songs with rxJava and retrofit, parse, then update UI through adapter
+                            Song[] songList = {
+                                    new Song("A", "1"),
+                                    new Song("B", "2"),
+                                    new Song("C", "3")
+                            };
 
+                            mSongListAdapter = new SongListAdapter(MainActivity.this, R.layout.song_list_item, songList);
+                            mSongListView.setAdapter(mSongListAdapter);
                         }
                 }
             }
