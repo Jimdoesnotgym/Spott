@@ -51,6 +51,7 @@ public class SongListAdapter extends ArrayAdapter<Song>{
 
         //TODO get current song
         songName.setText(currentSong.getSongName());
+        artistName.setText(currentSong.getArtistName());
 
         return convertView;
     }
