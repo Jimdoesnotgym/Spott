@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+            }else {
+                initialize();
             }
         }
 
@@ -134,11 +136,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Log.d(TAG, "asking for permissions for fine location");
-                    addSongListFragment();
-                    setUpBottomSheetSongList();
-                    setUpLocationCallback();
-                    setUpMap();
-                    retrieveLocation();
+                    initialize();
                 }
                 else {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
@@ -182,6 +180,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(TAG, "mCurrentCameraPosition is not null");
             mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
         }
+    }
+
+    private void initialize(){
+        addSongListFragment();
+        setUpBottomSheetSongList();
+        setUpLocationCallback();
+        setUpMap();
+        retrieveLocation();
     }
 
     private void addSongListFragment() {
