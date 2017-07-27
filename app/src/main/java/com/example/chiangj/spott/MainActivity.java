@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.chiangj.spott.adapters.SongListAdapter;
+import com.example.chiangj.spott.fragments.SongListFragment;
 import com.example.chiangj.spott.models.Song;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -74,21 +75,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
     private View mBottomSheetSongList;
-    private SongListAdapter mSongListAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private RecyclerView mRecyclerView;
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    //***************************************Android Lifecycle***************************************//
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
-
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -104,12 +95,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(mCurrentMarker != null){
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+
+                    //***************************For Testing Only***************************//
+                    isLocationChanged = true;
+                    //**********************************************************************//
+
                     return true;
                 }
                 return false;
             }
         });
-
+        addSongListFragment();
         setUpBottomSheetSongList();
         setUpLocationCallback();
         setUpMap();
@@ -135,8 +131,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onDestroy");
         super.onDestroy();
     }
-    //***************************************Android Lifecycle***************************************//
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -192,6 +186,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void addSongListFragment() {
+        SongListFragment songListFragment = new SongListFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.song_list_container, songListFragment).commit();
+    }
+
     private void setUpMap() {
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         Log.d(TAG, "getMapAsync");
@@ -243,24 +242,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     case BottomSheetBehavior.STATE_EXPANDED:
                         if(isLocationChanged){
                             isLocationChanged = false;
-                            //query songs with rxJava and retrofit, parse, then update UI through adapter
-                            Song[] songs = {
-                                    new Song("A", "1"),
-                                    new Song("B","2"),
-                                    new Song("C", "3"),
-                                    new Song("A", "1"),
-                                    new Song("B","2"),
-                                    new Song("C", "3"),
-                                    new Song("A", "1"),
-                                    new Song("B","2"),
-                                    new Song("C", "3"),
-                                    new Song("A", "1"),
-                                    new Song("B","2"),
-                                    new Song("C", "3")
-                            };
-
-                            mSongListAdapter = new SongListAdapter(Arrays.asList(songs));
-                            mRecyclerView.setAdapter(mSongListAdapter);
+                            //TODO query songs with rxJava and retrofit, parse, then update UI through adapter
                         }
                 }
             }
