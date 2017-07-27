@@ -60,29 +60,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String TAG = "MainActivity";
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
-
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private LatLng mCurrentLatLng;
-
     private boolean isRequestingLocationUpdates = false;
     private GoogleMap mGoogleMap;
-    private boolean mMapAnimated = false;
     private Marker mPreviousMarker;
     private Marker mCurrentMarker;
     private CameraPosition mCurrentCameraPosition;
     private boolean isLocationChanged;
-
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
-
     private View mBottomSheetSongList;
     private SongListAdapter mSongListAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    //***************************************Android Lifecycle***************************************//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onDestroy");
         super.onDestroy();
     }
+    //***************************************Android Lifecycle***************************************//
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -208,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(TAG, String.valueOf(location.getLongitude()));
                     if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
 
+                        //TODO
                         /*************************************************************
                          Should use the following when can actually test while moving
                          if(mCurrentLocation != location){
@@ -245,6 +245,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             isLocationChanged = false;
                             //query songs with rxJava and retrofit, parse, then update UI through adapter
                             Song[] songs = {
+                                    new Song("A", "1"),
+                                    new Song("B","2"),
+                                    new Song("C", "3"),
+                                    new Song("A", "1"),
+                                    new Song("B","2"),
+                                    new Song("C", "3"),
+                                    new Song("A", "1"),
+                                    new Song("B","2"),
+                                    new Song("C", "3"),
                                     new Song("A", "1"),
                                     new Song("B","2"),
                                     new Song("C", "3")
