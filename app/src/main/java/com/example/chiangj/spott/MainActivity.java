@@ -89,8 +89,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-            }else {
-                retrieveLocation();
             }
         }
 
@@ -105,25 +103,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return false;
             }
         });
-        addSongListFragment();
-        setUpBottomSheetSongList();
-        setUpLocationCallback();
-        setUpMap();
     }
 
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-
-        retrieveLocation();
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause");
         super.onPause();
-        stopLocationUpdates();
+        if(mFusedLocationClient != null && mLocationCallback != null){
+            stopLocationUpdates();
+        }
     }
 
     @Override
@@ -140,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Log.d(TAG, "asking for permissions for fine location");
+                    addSongListFragment();
+                    setUpBottomSheetSongList();
+                    setUpLocationCallback();
+                    setUpMap();
                     retrieveLocation();
                 }
                 else {
@@ -367,6 +365,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void stopLocationUpdates() {
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+       if(mFusedLocationClient != null){
+           mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+       }
     }
 }
