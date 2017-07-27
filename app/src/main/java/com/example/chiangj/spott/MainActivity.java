@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
@@ -55,7 +56,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "MainActivity";
@@ -75,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
     private View mBottomSheetSongList;
-    
+    private Bundle mSongListFragmentBundle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -187,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void addSongListFragment() {
-        SongListFragment songListFragment = new SongListFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.song_list_container, songListFragment).commit();
+        final SongListFragment songListFragment = new SongListFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.song_list_container, songListFragment, "SongListFragmentTag").commit();
     }
 
     private void setUpMap() {
@@ -236,13 +241,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if(BuildConfig.DEBUG) Log.d(TAG, String.valueOf(newState));
+                //if(BuildConfig.DEBUG) Log.d(TAG, String.valueOf(newState));
 
                 switch (newState){
                     case BottomSheetBehavior.STATE_EXPANDED:
                         if(isLocationChanged){
                             isLocationChanged = false;
                             //TODO query songs with rxJava and retrofit, parse, then update UI through adapter
+
+                            List<Song> list = new ArrayList<Song>();
+                            list.add(new Song("A", "1"));
+
+                            //create your own listener and call method in songlistfragment here and pass
+                            SongListFragment fragment = (SongListFragment) getSupportFragmentManager().findFragmentByTag("SongListFragmentTag");
+                            fragment.updateAdapterList(list);
                         }
                 }
             }
