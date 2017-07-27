@@ -1,1 +1,1 @@
-# Spott
+# Spot
