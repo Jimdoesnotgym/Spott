@@ -100,11 +100,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(mCurrentMarker != null){
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
-
-                    //***************************For Testing Only***************************//
-                    isLocationChanged = true;
-                    //**********************************************************************//
-
                     return true;
                 }
                 return false;
@@ -242,6 +237,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //if(BuildConfig.DEBUG) Log.d(TAG, String.valueOf(newState));
+
+                //***************************For Testing Only***************************//
+                isLocationChanged = true;
+                //**********************************************************************//
 
                 switch (newState){
                     case BottomSheetBehavior.STATE_EXPANDED:
