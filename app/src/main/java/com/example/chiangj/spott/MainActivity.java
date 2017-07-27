@@ -1,34 +1,23 @@
 package com.example.chiangj.spott;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
-import android.os.Handler;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.chiangj.spott.adapters.SongListAdapter;
 import com.example.chiangj.spott.fragments.SongListFragment;
 import com.example.chiangj.spott.models.Song;
 import com.google.android.gms.common.api.ApiException;
@@ -47,7 +36,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -56,15 +44,17 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
+    private static final String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_FINE_LOCATION
+    };
     private static final String TAG = "MainActivity";
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
+
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
@@ -79,19 +69,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
     private View mBottomSheetSongList;
-    private Bundle mSongListFragmentBundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-            }else {
-                initialize();
-            }
+        if(!hasPermissions()){
+            appRequestPermissions();
+        }else {
+            initialize();
         }
 
         mButtonCenterMap = (FloatingActionButton)findViewById(R.id.btn_center_map);
@@ -134,12 +121,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         switch (requestCode){
             case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                if(grantResults.length > 0 && isResultsAllGranted(grantResults)){
                     Log.d(TAG, "asking for permissions for fine location");
                     initialize();
                 }
                 else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                    appRequestPermissions();
                 }
             }
         }
@@ -188,6 +175,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setUpLocationCallback();
         setUpMap();
         retrieveLocation();
+    }
+
+    private boolean hasPermissions(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            for(String permission: PERMISSIONS){
+                if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isResultsAllGranted(int[] grantResults){
+        for(int i: grantResults){
+            if(i != PackageManager.PERMISSION_GRANTED){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void appRequestPermissions(){
+        ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
     }
 
     private void addSongListFragment() {
