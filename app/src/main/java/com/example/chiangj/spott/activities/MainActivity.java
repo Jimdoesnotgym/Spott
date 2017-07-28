@@ -1,4 +1,4 @@
-package com.example.chiangj.spott;
+package com.example.chiangj.spott.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -18,6 +18,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.chiangj.spott.BuildConfig;
+import com.example.chiangj.spott.R;
 import com.example.chiangj.spott.fragments.SongListFragment;
 import com.example.chiangj.spott.models.Song;
 import com.google.android.gms.common.api.ApiException;

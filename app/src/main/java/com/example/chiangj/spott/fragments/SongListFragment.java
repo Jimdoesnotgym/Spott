@@ -5,19 +5,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.chiangj.spott.BuildConfig;
-import com.example.chiangj.spott.MainActivity;
 import com.example.chiangj.spott.R;
 import com.example.chiangj.spott.adapters.SongListAdapter;
 import com.example.chiangj.spott.models.Song;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
