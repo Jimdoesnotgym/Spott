@@ -175,6 +175,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void appRequestPermissions(){
+        ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+    }
+
     private void initialize(){
         addSongListFragment();
         setUpBottomSheetSongList();
@@ -183,71 +187,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         retrieveLocation();
     }
 
-    private boolean hasPermissions(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            for(String permission: PERMISSIONS){
-                if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean isResultsAllGranted(int[] grantResults){
-        for(int i: grantResults){
-            if(i != PackageManager.PERMISSION_GRANTED){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void appRequestPermissions(){
-        ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-    }
-
     private void addSongListFragment() {
         final SongListFragment songListFragment = new SongListFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.song_list_container, songListFragment, "SongListFragmentTag").commit();
-    }
-
-    private void setUpMap() {
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        Log.d(TAG, "getMapAsync");
-        mapFragment.getMapAsync(this);
-    }
-
-    private void setUpLocationCallback() {
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for(Location location : locationResult.getLocations()){
-                    Log.d(TAG, String.valueOf(location.getLatitude()));
-                    Log.d(TAG, String.valueOf(location.getLongitude()));
-                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
-
-                        //TODO
-                        /*************************************************************
-                         Should use the following when can actually test while moving
-                         if(mCurrentLocation != location){
-                         mCurrentLocation = location;
-                         Log.d(TAG, "update map");
-                         updateMap();
-                         }
-                         *************************************************************/
-
-                        if(mCurrentLocation != location) {
-                            isLocationChanged = true;
-                        }
-
-                        mCurrentLocation = location;
-                        if(BuildConfig.DEBUG) Log.d(TAG, "location changed, update map");
-                        updateMap();
-                    }
-                }
-            }
-        };
     }
 
     private void setUpBottomSheetSongList() {
@@ -286,21 +228,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void updateMap() {
-        mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if(mIsFirstLaunch){
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
-            mIsFirstLaunch = false;
-        }
-        if(mCurrentMarker == null){
-            //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
-            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        }else {
-            mPreviousMarker = mCurrentMarker;
-            mPreviousMarker.remove();
-            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        }
+    private void setUpLocationCallback() {
+        mLocationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for(Location location : locationResult.getLocations()){
+                    Log.d(TAG, String.valueOf(location.getLatitude()));
+                    Log.d(TAG, String.valueOf(location.getLongitude()));
+                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
 
+                        //TODO
+                        /*************************************************************
+                         Should use the following when can actually test while moving
+                         if(mCurrentLocation != location){
+                         mCurrentLocation = location;
+                         Log.d(TAG, "update map");
+                         updateMap();
+                         }
+                         *************************************************************/
+
+                        if(mCurrentLocation != location) {
+                            isLocationChanged = true;
+                        }
+
+                        mCurrentLocation = location;
+                        if(BuildConfig.DEBUG) Log.d(TAG, "location changed, update map");
+                        updateMap();
+                    }
+                }
+            }
+        };
+    }
+
+    private void setUpMap() {
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        Log.d(TAG, "getMapAsync");
+        mapFragment.getMapAsync(this);
     }
 
     public void retrieveLocation(){
@@ -324,6 +287,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }catch (SecurityException e){
             e.printStackTrace();
         }
+    }
+
+    private boolean hasPermissions(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            for(String permission: PERMISSIONS){
+                if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isResultsAllGranted(int[] grantResults){
+        for(int i: grantResults){
+            if(i != PackageManager.PERMISSION_GRANTED){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void updateMap() {
+        mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        if(mIsFirstLaunch){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
+            mIsFirstLaunch = false;
+        }
+        if(mCurrentMarker == null){
+            //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }else {
+            mPreviousMarker = mCurrentMarker;
+            mPreviousMarker.remove();
+            mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
+        }
+
     }
 
     private void createLocationRequest() {
