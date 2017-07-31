@@ -20,7 +20,10 @@ import android.widget.Toast;
 
 import com.example.chiangj.spott.BuildConfig;
 import com.example.chiangj.spott.R;
+import com.example.chiangj.spott.apis.GooglePlacesApi;
 import com.example.chiangj.spott.fragments.SongListFragment;
+import com.example.chiangj.spott.models.Place;
+import com.example.chiangj.spott.models.PlaceList;
 import com.example.chiangj.spott.models.Song;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -48,6 +51,14 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final String[] PERMISSIONS = {
@@ -83,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             appRequestPermissions();
         }else {
             initialize();
+            queryPlaces();
         }
 
         mButtonCenterMap = (FloatingActionButton)findViewById(R.id.btn_center_map);
@@ -388,5 +400,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
        if(mFusedLocationClient != null){
            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
        }
+    }
+
+    private void queryPlaces(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://maps.googleapis.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+
+        GooglePlacesApi service = retrofit.create(GooglePlacesApi.class);
+        service.getPlaceList("-33.8670522,151.1957362", "300", String.valueOf(R.string.google_maps_key))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<PlaceList>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull PlaceList placeList) {
+                        Log.d(TAG, "Jim2 " + placeList.getResults());
+                        for(Object place : placeList.getResults()){
+                            Log.d(TAG, "Jim 3");
+                        }
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        Log.e(TAG, e.getMessage() + " Jim", e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }

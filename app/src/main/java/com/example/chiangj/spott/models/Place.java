@@ -13,4 +13,20 @@ public class Place {
         mPlacePhotos = placePhotos;
         mAddressComponents = addressComponents;
     }
+
+    public String getmName() {
+        return mName;
+    }
+
+    public String[] getmTypes() {
+        return mTypes;
+    }
+
+    public Object[] getmPlacePhotos() {
+        return mPlacePhotos;
+    }
+
+    public Object[] getmAddressComponents() {
+        return mAddressComponents;
+    }
 }
