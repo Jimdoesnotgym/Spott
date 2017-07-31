@@ -53,9 +53,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION
     };
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
+
+    private final float MAP_ZOOM_LEVEL = 18.0f;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mCurrentLocation;
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(mCurrentMarker != null){
-                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
                     return true;
                 }
                 return false;
@@ -165,8 +167,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onMapReady, setting map object");
         mGoogleMap = googleMap;
 
-        if(mCurrentCameraPosition != null && mGoogleMap != null){
-            Log.d(TAG, "mCurrentCameraPosition is not null");
+        if(mGoogleMap != null){
+            mGoogleMap.setMaxZoomPreference(MAP_ZOOM_LEVEL);
+        }
+        if(mCurrentCameraPosition != null){
             mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
         }
     }
@@ -285,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void updateMap() {
         mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         if(mIsFirstLaunch){
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
             mIsFirstLaunch = false;
         }
         if(mCurrentMarker == null){
