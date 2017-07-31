@@ -114,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+        if(!mIsFirstLaunch){
+            startLocationUpdates();
+        }
     }
 
     @Override
