@@ -2,16 +2,16 @@ package com.example.chiangj.spott.models;
 
 import java.util.List;
 
-public class PlaceList {
-    private List<String> html_attributions;
-    private List<Object> results;
+public class PlaceList<T, U> {
+    private List<U> html_attributions;
+    private List<T> results;
     private String status;
 
-    public List<String> getHtml_attributions() {
+    public List<U> getHtml_attributions() {
         return html_attributions;
     }
 
-    public List<Object> getResults() {
+    public List<T> getResults() {
         return results;
     }
 }
