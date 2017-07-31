@@ -170,9 +170,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(mGoogleMap != null){
             mGoogleMap.setMaxZoomPreference(MAP_ZOOM_LEVEL);
         }
-        if(mCurrentCameraPosition != null){
-            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCurrentCameraPosition));
-        }
     }
 
     private void appRequestPermissions(){
