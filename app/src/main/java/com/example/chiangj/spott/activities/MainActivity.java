@@ -421,10 +421,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull PlaceList placeList) {
-                        if(placeList.getResults().size() == 0){
-                            Log.d(TAG, "Jim2 " + placeList.getResults());
+                        if(placeList.results.size() == 0){
+                            Log.d(TAG, "Jim2 " + placeList.results);
+                            Log.d(TAG, "Jim4 " + placeList.status);
                         }
-                        for(Object place : placeList.getResults()){
+                        for(Object place : placeList.results){
                             Log.d(TAG, "Jim 3");
                         }
                     }
