@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
 
         GooglePlacesApi service = retrofit.create(GooglePlacesApi.class);
-        service.getPlaceList("-33.8670522,151.1957362", "300", String.valueOf(R.string.google_maps_key))
+        service.getPlaceList("-33.8670522,151.1957362", "300", String.valueOf(R.string.google_places_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<PlaceList>() {

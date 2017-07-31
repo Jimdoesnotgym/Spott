@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Spott</string>
     <string name="google_maps_key">AIzaSyBv7Y1d97ahJp8R0pyJx0gUccjTdq9hp28</string>
+    <string name="google_places_key">AIzaSyDhsvtUWYMuHdVUSMp5hSA0bReHKE_ENkk</string>
 </resources>
