@@ -60,7 +60,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION
     };
@@ -75,11 +75,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private LatLng mCurrentLatLng;
-    private boolean isRequestingLocationUpdates = false;
     private GoogleMap mGoogleMap;
     private Marker mPreviousMarker;
     private Marker mCurrentMarker;
-    private CameraPosition mCurrentCameraPosition;
     private boolean isLocationChanged;
     private FloatingActionButton mButtonCenterMap;
     private boolean mIsFirstLaunch = true;
@@ -90,18 +88,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!hasPermissions()){
+        if (!hasPermissions()) {
             appRequestPermissions();
-        }else {
+        } else {
             initialize();
             queryPlaces();
         }
 
-        mButtonCenterMap = (FloatingActionButton)findViewById(R.id.btn_center_map);
+        mButtonCenterMap = (FloatingActionButton) findViewById(R.id.btn_center_map);
         mButtonCenterMap.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(mCurrentMarker != null){
+                if (mCurrentMarker != null) {
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
                     return true;
                 }
@@ -114,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        if(!mIsFirstLaunch){
+        if (!mIsFirstLaunch) {
             startLocationUpdates();
         }
     }
@@ -123,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onPause() {
         Log.d(TAG, "onPause");
         super.onPause();
-        if(mFusedLocationClient != null && mLocationCallback != null){
+        if (mFusedLocationClient != null && mLocationCallback != null) {
             stopLocationUpdates();
         }
     }
@@ -138,13 +136,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode){
+        switch (requestCode) {
             case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
-                if(grantResults.length > 0 && isResultsAllGranted(grantResults)){
+                if (grantResults.length > 0 && isResultsAllGranted(grantResults)) {
                     Log.d(TAG, "asking for permissions for fine location");
                     initialize();
-                }
-                else {
+                } else {
                     appRequestPermissions();
                 }
             }
@@ -153,9 +150,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_CHECK_SETTINGS:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Log.d(TAG, "REQUEST_CHECK_SETTINGS result ok");
                     startLocationUpdates();
                 }
@@ -173,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Log.d(TAG, "onrestoreinstancestate");
-        mCurrentCameraPosition = savedInstanceState.getParcelable("cameraposition");
         mIsFirstLaunch = savedInstanceState.getBoolean("isFirstLaunch");
     }
 
@@ -182,16 +178,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onMapReady, setting map object");
         mGoogleMap = googleMap;
 
-        if(mGoogleMap != null){
+        if (mGoogleMap != null) {
             mGoogleMap.setMaxZoomPreference(MAP_ZOOM_LEVEL);
         }
     }
 
-    private void appRequestPermissions(){
+    private void appRequestPermissions() {
         ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
     }
 
-    private void initialize(){
+    private void initialize() {
         addSongListFragment();
         setUpBottomSheetSongList();
         setUpLocationCallback();
@@ -217,9 +213,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 isLocationChanged = true;
                 //**********************************************************************//
 
-                switch (newState){
+                switch (newState) {
                     case BottomSheetBehavior.STATE_EXPANDED:
-                        if(isLocationChanged){
+                        if (isLocationChanged) {
                             isLocationChanged = false;
                             //TODO query songs with rxJava and retrofit, parse, then update UI through adapter
 
@@ -241,13 +237,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void setUpLocationCallback() {
-        mLocationCallback = new LocationCallback(){
+        mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                for(Location location : locationResult.getLocations()){
+                for (Location location : locationResult.getLocations()) {
                     Log.d(TAG, String.valueOf(location.getLatitude()));
                     Log.d(TAG, String.valueOf(location.getLongitude()));
-                    if((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)){
+                    if ((location != mCurrentLocation && mGoogleMap != null) || (mCurrentLocation == null && mGoogleMap != null)) {
 
                         //TODO
                         /*************************************************************
@@ -259,12 +255,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                          }
                          *************************************************************/
 
-                        if(mCurrentLocation != location) {
+                        if (mCurrentLocation != location) {
                             isLocationChanged = true;
                         }
 
                         mCurrentLocation = location;
-                        if(BuildConfig.DEBUG) Log.d(TAG, "location changed, update map");
+                        if (BuildConfig.DEBUG) Log.d(TAG, "location changed, update map");
                         updateMap();
                     }
                 }
@@ -278,9 +274,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
     }
 
-    public void retrieveLocation(){
+    public void retrieveLocation() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        try{
+        try {
             mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
@@ -296,15 +292,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
             });
-        }catch (SecurityException e){
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
     }
 
-    private boolean hasPermissions(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            for(String permission: PERMISSIONS){
-                if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+    private boolean hasPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String permission : PERMISSIONS) {
+                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
             }
@@ -312,9 +308,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-    private boolean isResultsAllGranted(int[] grantResults){
-        for(int i: grantResults){
-            if(i != PackageManager.PERMISSION_GRANTED){
+    private boolean isResultsAllGranted(int[] grantResults) {
+        for (int i : grantResults) {
+            if (i != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
         }
@@ -323,14 +319,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateMap() {
         mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if(mIsFirstLaunch){
+        if (mIsFirstLaunch) {
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, MAP_ZOOM_LEVEL));
             mIsFirstLaunch = false;
         }
-        if(mCurrentMarker == null){
+        if (mCurrentMarker == null) {
             //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng, 17.0f));
             mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
-        }else {
+        } else {
             mPreviousMarker = mCurrentMarker;
             mPreviousMarker.remove();
             mCurrentMarker = mGoogleMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Current Location"));
@@ -340,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void createLocationRequest() {
         Log.d(TAG, "inside createLocationRequest");
-        if(mLocationRequest == null){
+        if (mLocationRequest == null) {
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(5000);
             mLocationRequest.setFastestInterval(2500);
@@ -357,7 +353,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 //initialize location requests here
                 Log.d(TAG, "LocationSettingsResponse onSuccess, starting location updates");
-                isRequestingLocationUpdates = true;
                 startLocationUpdates();
             }
         });
@@ -367,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onFailure(@NonNull Exception e) {
                 //check e.getStatusCOde
                 int statusCode = ((ApiException) e).getStatusCode();
-                switch (statusCode){
+                switch (statusCode) {
                     case CommonStatusCodes.RESOLUTION_REQUIRED:
                         //Location settings are not satisfied, show user dialog to fix this
                         try {
@@ -375,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             //and check the result in onActiityResult()
                             ResolvableApiException resolvable = (ResolvableApiException) e;
                             resolvable.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-                        }catch (IntentSender.SendIntentException sendEx){
+                        } catch (IntentSender.SendIntentException sendEx) {
 
                         }
                         break;
@@ -389,23 +384,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void startLocationUpdates() {
-        if(isRequestingLocationUpdates){
-            Log.d(TAG, "start location updates");
-            try{
-                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-            }catch (SecurityException e){
-                e.printStackTrace();
-            }
+
+        Log.d(TAG, "start location updates");
+        try {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
+
     }
 
     private void stopLocationUpdates() {
-       if(mFusedLocationClient != null){
-           mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-       }
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }
     }
 
-    private void queryPlaces(){
+    private void queryPlaces() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://maps.googleapis.com/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -424,11 +419,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull PlaceList placeList) {
-                        if(placeList.results.size() == 0){
+                        if (placeList.results.size() == 0) {
                             Log.d(TAG, "Jim2 " + placeList.results);
                             Log.d(TAG, "Jim4 " + placeList.status);
                         }
-                        for(Object place : placeList.results){
+                        for (Object place : placeList.results) {
                             Log.d(TAG, "Jim 3");
                         }
                     }
