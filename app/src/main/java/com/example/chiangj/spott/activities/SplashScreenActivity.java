@@ -11,8 +11,6 @@ import com.example.chiangj.spott.R;
 
 public class SplashScreenActivity extends Activity {
 
-    private static final int SPLASH_REQUEST_CODE = 1;
-
     private Handler mHandler;
 
     @Override
@@ -32,8 +30,8 @@ public class SplashScreenActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         finish();
     }
 }
