@@ -46,4 +46,7 @@ dependencies {
     //RxJava Adapter
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
 
+    //lottie-android
+    compile 'com.airbnb.android:lottie:2.1.0'
+
 }
