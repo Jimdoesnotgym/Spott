@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:id="@+id/main_parent">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:name="com.google.android.gms.maps.MapFragment"
@@ -25,6 +26,20 @@
         app:layout_anchorGravity="top|end"
         app:borderWidth="0dp"
         android:background="@color/colorAccent"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/frame_splash"
+        android:background="#1cbdec">
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:lottie_fileName="loader_4.json"
+            app:lottie_loop="true"
+            app:lottie_autoPlay="true"
+            app:lottie_colorFilter="#FFFFFF"/>
+    </FrameLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>
